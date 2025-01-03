@@ -10,6 +10,7 @@ class User(db.Model):
     password = db.Column(db.String(120), nullable=False)
     gender = db.Column(db.String(120), nullable=False)
     major = db.Column(db.String(120), nullable=False)
+    level = db.Column(db.Integer, nullable=False)
 
     def to_json(self):
         return {
@@ -19,5 +20,25 @@ class User(db.Model):
             'email': self.email,
             'password': self.password,
             'gender': self.gender,
-            'major': self.major
+            'major': self.major,
+            'level': self.level
+        }
+
+class Level(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(120), nullable=False)
+    problem = db.Column(db.String(200), nullable=False)
+    solution = db.Column(db.String(200), nullable=False)
+
+    def __init__(self, title, problem, solution):
+        self.title = title
+        self.problem = problem
+        self.solution = solution
+
+    def to_json(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'problem': self.problem,
+            'solution': self.solution
         }

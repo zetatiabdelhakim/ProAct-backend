@@ -33,7 +33,8 @@ def register():
         email=email,
         password=password,
         gender=gender,
-        major=major
+        major=major,
+        level=1
     )
     db.session.add(new_user)
     db.session.commit()
@@ -42,6 +43,27 @@ def register():
         "user": new_user.to_json(),
         "pass": True
     }), 201
+
+@app.route("/login", methods=["POST"])
+def login():
+    data = request.json
+
+    username = data.get('username')
+    password = data.get('password')
+
+    user = User.query.filter_by(username=username).first()
+
+    if not user:
+        return jsonify({"valid": False, "error": "Username does not exist"}), 400
+
+    if user.password != password:
+        return jsonify({"valid": False, "error": "Invalid password"}), 400
+
+    return jsonify({
+        "valid": True,
+        "user": user.to_json()
+    }), 200
+
 
 
 
