@@ -1,10 +1,11 @@
-from flask import request, jsonify, send_file
+from flask import request, jsonify, send_file, abort
 from config import app, db
 import os
 from flask import jsonify
 import json
 
-from models import User
+from ia import ask_question
+from models import User, Level
 
 
 @app.route("/register", methods=["POST"])
@@ -64,8 +65,48 @@ def login():
         "user": user.to_json()
     }), 200
 
+@app.route('/level/<int:level_id>', methods=['GET'])
+def get_level(level_id):
+    level = Level.query.get(level_id)
+    if not level:
+        abort(404, description="Level not found")
+    return jsonify(level.to_json())
 
+@app.route('/user/level/<int:user_id>', methods=['GET'])
+def get_user_level(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        abort(404, description="User not found")
+    return jsonify({
+        'level': user.level
+    })
 
+@app.route('/user/<int:user_id>/increment-level', methods=['POST'])
+def increment_user_level(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        abort(404, description="User not found")
+    user.level += 1
+    db.session.commit()
+    return jsonify({
+        'message': f"User {user_id}'s level has been incremented.",
+        'new_level': user.level
+    })
+
+@app.route("/submit_level", methods=["POST"])
+def submit_level():
+    data = request.json
+
+    level_id = int(data.get('level_id'))
+    user_answer = data.get('answer')
+
+    level = Level.query.get(level_id)
+    if not level:
+        abort(404, description="Level not found")
+
+    send = ask_question(level.problem, user_answer)
+
+    return jsonify(send), 200
 
 if __name__ == "__main__":
     with app.app_context():
