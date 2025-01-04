@@ -30,11 +30,6 @@ class Level(db.Model):
     problem = db.Column(db.String(200), nullable=False)
     solution = db.Column(db.String(200), nullable=False)
 
-    def __init__(self, title, problem, solution):
-        self.title = title
-        self.problem = problem
-        self.solution = solution
-
     def to_json(self):
         return {
             'id': self.id,
